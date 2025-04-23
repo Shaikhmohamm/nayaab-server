@@ -13,10 +13,22 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://nayaab.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "http://localhost:3000", // ✅ Allow frontend URL
-    credentials: true, // ✅ Allow sending cookies
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
