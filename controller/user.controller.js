@@ -71,9 +71,10 @@ export const registerUser = async (req, res) => {
         );
 
         res.cookie("authToken", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production", // true in production
+          sameSite: "None", // ❗ Allow cross-site requests
+          maxAge: 60 * 60 * 1000, // Optional: 1 hour in milliseconds
         });
 
         res.status(200).json({ message: "Login successful!", user: { id: user._id, role: user.role } });
