@@ -77,7 +77,7 @@ export const registerUser = async (req, res) => {
           maxAge: 60 * 60 * 1000, // Optional: 1 hour in milliseconds
         });
 
-        res.status(200).json({ message: "Login successful!", user: { id: user._id, role: user.role } });
+        res.status(200).json({ message: "Login successful!", user: { id: user._id, role: user.role , auth: user.isVerified} });
     } catch (error) {
         res.status(500).json({ message: "Server error" });
     }
@@ -87,17 +87,13 @@ export const registerUser = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
     try {
-        console.log("User in Request Object:", req.user); // Debugging
-
         if (!req.user || !req.user.id) {
-            console.log("No user found in request object.");
             return res.status(401).json({ message: "Unauthorized", user: null });
         }
 
         const user = await User.findById(req.user.id).select("-password");
 
         if (!user) {
-            console.log("User not found in DB for ID:", req.user.id);
             return res.status(404).json({ message: "User not found", user: null });
         }
 

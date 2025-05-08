@@ -3,26 +3,27 @@ import Product from "../models/Product.model.js";
 // to add the products to database
 export const addProduct = async (req, res) => {
     try {
-        const { name, description, price, category, images, stock, isFeatured, discount } = req.body;
+        const { name, description, price, category, stock, isFeatured, discount } = req.body;
 
-        // Basic validation
-        if (!name || !description || !price || !category || !images || images.length === 0) {
+        // If images are uploaded, map their file paths
+        const imageUrls = req.files.map(file => `${req.protocol}://${req.get("host")}/uploads/${file.filename}`);
+
+        // Validation
+        if (!name || !description || !price || !category || imageUrls.length === 0) {
             return res.status(400).json({ message: "Please provide all required fields." });
         }
 
-        // Create new product
         const newProduct = new Product({
             name,
             description,
             price,
             category,
-            images,
-            stock: stock || 10, // Default to 10 if not provided
-            isFeatured: isFeatured || false, // Default to false if not provided
-            discount: discount || 0, // Default to 0 if not provided
+            images: imageUrls,
+            stock: stock || 10,
+            isFeatured: isFeatured || false,
+            discount: discount || 0,
         });
 
-        // Save product to database
         const savedProduct = await newProduct.save();
         res.status(201).json({ message: "Product added successfully!", product: savedProduct });
 
@@ -31,6 +32,7 @@ export const addProduct = async (req, res) => {
         res.status(500).json({ message: "Server error. Unable to add product." });
     }
 };
+
 
 
 // Get all products or a single product by ID
