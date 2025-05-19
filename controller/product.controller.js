@@ -1,38 +1,58 @@
 import Product from "../models/Product.model.js";
 
-// to add the products to database
+// Controller to add a product (Cloudinary URLs in req.body)
 export const addProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock, isFeatured, discount } = req.body;
-
-        // If images are uploaded, map their file paths
-        const imageUrls = req.files.map(file => `${req.protocol}://${req.get("host")}/uploads/${file.filename}`);
-
-        // Validation
-        if (!name || !description || !price || !category || imageUrls.length === 0) {
-            return res.status(400).json({ message: "Please provide all required fields." });
-        }
-
-        const newProduct = new Product({
-            name,
-            description,
-            price,
-            category,
-            images: imageUrls,
-            stock: stock || 10,
-            isFeatured: isFeatured || false,
-            discount: discount || 0,
+      const {
+        name,
+        description,
+        price,
+        category,
+        images,
+        stock,
+        isFeatured,
+        discount,
+      } = req.body;
+  
+      // Validation
+      if (
+        !name ||
+        !description ||
+        !price ||
+        !category ||
+        !images ||
+        !Array.isArray(images) ||
+        images.length === 0
+      ) {
+        return res.status(400).json({
+          message: "Please provide all required fields including at least one image URL.",
         });
-
-        const savedProduct = await newProduct.save();
-        res.status(201).json({ message: "Product added successfully!", product: savedProduct });
-
+      }
+  
+      // Create new product
+      const newProduct = new Product({
+        name,
+        description,
+        price,
+        category,
+        images, // direct Cloudinary URLs
+        stock: stock ?? 10,
+        isFeatured: isFeatured ?? false,
+        discount: discount ?? 0,
+      });
+  
+      const savedProduct = await newProduct.save();
+      res.status(201).json({
+        message: "Product added successfully!",
+        product: savedProduct,
+      });
     } catch (error) {
-        console.error("Error adding product:", error);
-        res.status(500).json({ message: "Server error. Unable to add product." });
+      console.error("Error adding product:", error);
+      res.status(500).json({
+        message: "Server error. Unable to add product.",
+      });
     }
-};
-
+  };
 
 
 // Get all products or a single product by ID
